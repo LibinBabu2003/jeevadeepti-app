@@ -20,7 +20,7 @@ const Home: React.FC = () => {
           </h1>
           <p className="mt-4 max-w-lg mx-auto text-lg text-gray-500 font-malayalam">
             രക്തം നൽകൂ, ജീവൻ രക്ഷിക്കൂ. <br/>
-            An Initiative by <span className="font-bold text-brand-600">Yuvadeepti SMYM</span>
+            An Initiative by <span className="font-bold text-brand-600">Yuvadeepti SMYM Muttar NEW</span>
           </p>
 
           <div className="mt-12 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
