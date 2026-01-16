@@ -39,13 +39,14 @@ const AdminPanel: React.FC = () => {
   const [donors, setDonors] = useState<Donor[]>([]);
   const [contacts, setContacts] = useState<DirectoryContact[]>([]);
 
-  // Form State (For adding new contact)
+  // --- FORM STATE (Refined for "Other" Logic) ---
   const [newContact, setNewContact] = useState({
     name: '',
-    category: 'Ambulance',
     phone: '',
     location: ''
   });
+  const [selectedCategory, setSelectedCategory] = useState('Ambulance');
+  const [customCategory, setCustomCategory] = useState('');
 
   // --- 1. LOGIN ---
   const handleLogin = (e: React.FormEvent) => {
@@ -105,17 +106,39 @@ const AdminPanel: React.FC = () => {
       return;
     }
 
+    // LOGIC: If 'Other' is selected AND user typed a custom name, use that.
+    // Otherwise, use the selected category.
+    const finalCategory = (selectedCategory === 'Other' &&Pk customCategory.trim() !== '') 
+      ? customCategory.trim() 
+      : selectedCategory;
+
     try {
-      const docRef = await addDoc(collection(db, "contacts"), {
-        ...newContact,
+      const docData = {
+        name: newContact.name,
+        phone: newContact.phone,
+        location: newContact.location,
+        category: finalCategory,
         createdAt: serverTimestamp()
-      });
+      };
+
+      const docRef = await addDoc(collection(db, "contacts"), docData);
       
-      // Update UI immediately
-      setContacts([...contacts, { id: docRef.id, ...newContact }]);
+      // Update UI immediately (cast to DirectoryContact to satisfy TS)
+      const newEntry: DirectoryContact = { 
+        id: docRef.id, 
+        name: docData.name,
+        phone: docData.phone,
+        location: docData.location,
+        category: docData.category
+      };
+      
+      setContacts([...contacts, newEntry]);
       
       // Reset Form
-      setNewContact({ name: '', category: 'Ambulance', phone: '', location: '' });
+      setNewContact({ name: '', phone: '', location: '' });
+      setSelectedCategory('Ambulance');
+      setCustomCategory('');
+      
       alert("Contact Added Successfully!");
     } catch (error) {
       console.error("Error adding contact: ", error);
@@ -240,9 +263,24 @@ const AdminPanel: React.FC = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select className="w-full p-2 border rounded-md" value={newContact.category} onChange={e => setNewContact({...newContact, category: e.target.value})}>
+                  <select 
+                    className="w-full p-2 border rounded-md" 
+                    value={selectedCategory} 
+                    onChange={e => setSelectedCategory(e.target.value)}
+                  >
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
+
+                  {/* SHOW THIS INPUT ONLY IF 'OTHER' IS SELECTED */}
+                  {selectedCategory === 'Other' && (
+                    <input 
+                      type="text" 
+                      className="w-full p-2 mt-2 border border-brand-300 rounded-md bg-brand-50 text-brand-800 placeholder-brand-300 focus:ring-2 focus:ring-brand-500 outline-none transition-all" 
+                      placeholder="Name the category (Optional)" 
+                      value={customCategory} 
+                      onChange={e => setCustomCategory(e.target.value)}
+                    />
+                  )}
                 </div>
 
                 <div>
