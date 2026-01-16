@@ -12,7 +12,7 @@ interface Donor {
   bloodGroup: string;
   district: string;
   location: string;
-  phone: string; // FIXED: Was 'mobile', now 'phone' to match Registration
+  phone: string; // FIXED: Matches database now
 }
 
 interface DirectoryContact {
@@ -66,16 +66,16 @@ const AdminPanel: React.FC = () => {
     try {
       const q = query(collection(db, 'donors'), orderBy('name'));
       const snapshot = await getDocs(q);
-      // SAFETY CHECK: Ensure data exists before using it
+      
       const donorList = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
-          name: data.name || 'Unknown',
-          bloodGroup: data.bloodGroup || '?',
+          name: data.name || '',
+          bloodGroup: data.bloodGroup || '',
           district: data.district || '',
           location: data.location || '',
-          phone: data.phone || data.mobile || '' // Handle both names just in case
+          phone: data.phone || data.mobile || '' // Handle both key names safely
         } as Donor;
       });
       setDonors(donorList);
@@ -118,7 +118,7 @@ const AdminPanel: React.FC = () => {
       return;
     }
 
-    // LOGIC: Use custom category if 'Other' is selected
+    // Custom Category Logic
     const finalCategory = (selectedCategory === 'Other' && customCategory.trim() !== '') 
       ? customCategory.trim() 
       : selectedCategory;
@@ -217,8 +217,8 @@ const AdminPanel: React.FC = () => {
               <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search Donors..."
-                className="w-full pl-10 pr-4 py-2 border rounded-lg"
+                placeholder="Search Name or Phone..."
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -237,23 +237,30 @@ const AdminPanel: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {donors.filter(d => {
-                  // SAFE SEARCH: Checks if name/phone exist before searching
-                  const nameMatch = d.name?.toLowerCase().includes(searchTerm.toLowerCase());
-                  const phoneMatch = d.phone?.includes(searchTerm);
+                  const term = searchTerm.toLowerCase();
+                  const nameMatch = d.name ? d.name.toLowerCase().includes(term) : false;
+                  const phoneMatch = d.phone ? d.phone.includes(term) : false;
                   return nameMatch || phoneMatch;
                 }).map((donor) => (
                   <tr key={donor.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium">{donor.name}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">{donor.name}</td>
                     <td className="px-6 py-4 text-gray-600">{donor.phone}</td>
                     <td className="px-6 py-4"><span className="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">{donor.bloodGroup}</span></td>
                     <td className="px-6 py-4 text-gray-600">{donor.location}</td>
                     <td className="px-6 py-4 text-center">
-                      <button onClick={() => handleDeleteDonor(donor.id, donor.name)} className="text-red-600 hover:bg-red-50 p-2 rounded-full">
+                      <button 
+                        onClick={() => handleDeleteDonor(donor.id, donor.name)} 
+                        className="text-red-600 hover:bg-red-50 p-2 rounded-full transition-colors"
+                        title="Delete Donor"
+                      >
                         <Trash2 className="h-5 w-5" />
                       </button>
                     </td>
                   </tr>
                 ))}
+                {donors.length === 0 && !loading && (
+                   <tr><td colSpan={5} className="text-center py-6 text-gray-500">No donors found.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -279,7 +286,7 @@ const AdminPanel: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <select 
-                    className="w-full p-2 border rounded-md" 
+                    className="w-full p-2 border rounded-md bg-white" 
                     value={selectedCategory} 
                     onChange={e => setSelectedCategory(e.target.value)}
                   >
