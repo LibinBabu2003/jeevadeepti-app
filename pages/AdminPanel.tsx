@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   collection, getDocs, deleteDoc, doc, query, orderBy, addDoc, serverTimestamp 
 } from 'firebase/firestore';
@@ -12,7 +12,7 @@ interface Donor {
   bloodGroup: string;
   district: string;
   location: string;
-  mobile: string;
+  phone: string; // FIXED: Was 'mobile', now 'phone' to match Registration
 }
 
 interface DirectoryContact {
@@ -39,7 +39,7 @@ const AdminPanel: React.FC = () => {
   const [donors, setDonors] = useState<Donor[]>([]);
   const [contacts, setContacts] = useState<DirectoryContact[]>([]);
 
-  // --- FORM STATE (Refined for "Other" Logic) ---
+  // --- FORM STATE ---
   const [newContact, setNewContact] = useState({
     name: '',
     phone: '',
@@ -66,7 +66,19 @@ const AdminPanel: React.FC = () => {
     try {
       const q = query(collection(db, 'donors'), orderBy('name'));
       const snapshot = await getDocs(q);
-      setDonors(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Donor)));
+      // SAFETY CHECK: Ensure data exists before using it
+      const donorList = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name || 'Unknown',
+          bloodGroup: data.bloodGroup || '?',
+          district: data.district || '',
+          location: data.location || '',
+          phone: data.phone || data.mobile || '' // Handle both names just in case
+        } as Donor;
+      });
+      setDonors(donorList);
     } catch (err) { console.error(err); }
     setLoading(false);
   };
@@ -106,9 +118,8 @@ const AdminPanel: React.FC = () => {
       return;
     }
 
-    // LOGIC: If 'Other' is selected AND user typed a custom name, use that.
-    // Otherwise, use the selected category.
-    const finalCategory = (selectedCategory === 'Other' &&Pk customCategory.trim() !== '') 
+    // LOGIC: Use custom category if 'Other' is selected
+    const finalCategory = (selectedCategory === 'Other' && customCategory.trim() !== '') 
       ? customCategory.trim() 
       : selectedCategory;
 
@@ -123,7 +134,6 @@ const AdminPanel: React.FC = () => {
 
       const docRef = await addDoc(collection(db, "contacts"), docData);
       
-      // Update UI immediately (cast to DirectoryContact to satisfy TS)
       const newEntry: DirectoryContact = { 
         id: docRef.id, 
         name: docData.name,
@@ -226,10 +236,15 @@ const AdminPanel: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {donors.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.mobile.includes(searchTerm)).map((donor) => (
+                {donors.filter(d => {
+                  // SAFE SEARCH: Checks if name/phone exist before searching
+                  const nameMatch = d.name?.toLowerCase().includes(searchTerm.toLowerCase());
+                  const phoneMatch = d.phone?.includes(searchTerm);
+                  return nameMatch || phoneMatch;
+                }).map((donor) => (
                   <tr key={donor.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 font-medium">{donor.name}</td>
-                    <td className="px-6 py-4 text-gray-600">{donor.mobile}</td>
+                    <td className="px-6 py-4 text-gray-600">{donor.phone}</td>
                     <td className="px-6 py-4"><span className="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">{donor.bloodGroup}</span></td>
                     <td className="px-6 py-4 text-gray-600">{donor.location}</td>
                     <td className="px-6 py-4 text-center">
