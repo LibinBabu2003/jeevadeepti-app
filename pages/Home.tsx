@@ -28,7 +28,7 @@ const Home: React.FC = () => {
         
         {/* 1. BACKGROUND IMAGE LAYER - No Gradient */}
         <div 
-          className="absolute inset-0 bg-[url('/banner1.jpg')] bg-cover bg-center opacity-50" 
+          className="absolute inset-0 bg-[url('/banner1.png')] bg-cover bg-center opacity-50" 
         />
         
         <div className="relative max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
