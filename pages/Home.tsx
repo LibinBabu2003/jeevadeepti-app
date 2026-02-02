@@ -24,35 +24,35 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* HERO SECTION */}
-      {/* 1. Changed bg-gray-900 to bg-white to remove dark background color */}
       <div className="relative bg-white text-gray-800 overflow-hidden">
         
-        {/* 2. BANNER IMAGE FIXES: 
-            - Removed 'opacity-50' so image is fully visible (no gray shade).
-            - Changed 'bg-center' to 'bg-[center_top]' so heads are not cut off on mobile.
+        {/* 1. BANNER IMAGE:
+            - No 'opacity' (Full brightness)
+            - bg-[center_top] (Fixes mobile cropping by focusing on the top part/faces)
         */}
         <div 
           className="absolute inset-0 bg-[url('/banner1.png')] bg-cover bg-[center_top]" 
         />
         
-        {/* 3. Added a White Fade Overlay (Optional) to make text readable without making it gray */}
-        {/* This fades from transparent at top to white at bottom, blending with the page */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/20 to-white/10 md:hidden" />
+        {/* 2. OVERLAY REMOVED: 
+            I have removed the gradient divs so the image is clear. 
+            The text below uses shadows to remain readable. 
+        */}
 
-        {/* 4. REDUCED PADDING: Changed 'py-24' to 'py-16 md:py-24' to fit mobile screens better */}
         <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
           
-          {/* Icon Box - Added white background for readability over image */}
-          <div className="bg-white/80 p-3 rounded-full mb-6 backdrop-blur-sm shadow-sm">
+          {/* Heart Icon - White background for contrast */}
+          <div className="bg-white/90 p-3 rounded-full mb-6 backdrop-blur-sm shadow-md">
             <Heart className="h-12 w-12 text-red-600 animate-pulse" fill="currentColor" />
           </div>
           
-          {/* Text with text-shadow for readability over image */}
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-gray-900 drop-shadow-lg shadow-white">
+          {/* TITLE: Pure White with Shadow */}
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
             Jeevadeepti
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-800 max-w-2xl mb-8 font-medium drop-shadow-md shadow-white bg-white/30 p-2 rounded-lg backdrop-blur-[2px]">
+          {/* SUBTITLE: Dark text on a light glass-effect box for readability */}
+          <p className="text-xl md:text-2xl text-gray-900 max-w-2xl mb-8 font-medium bg-white/40 p-4 rounded-xl backdrop-blur-md shadow-sm border border-white/30">
             Yuvadeepti SMYM Muttar New
             <br/>
             <span className="text-sm md:text-base opacity-90 mt-2 block font-normal">
@@ -121,7 +121,7 @@ const Home: React.FC = () => {
           If you are unable to find a donor or need urgent help, please contact the SMYM Coordinator.
         </p>
         <a 
-          href="tel:9999999999"
+          href="tel:8547242798" // Replace with actual number
           className="inline-flex items-center gap-2 text-gray-700 font-bold bg-gray-100 px-6 py-3 rounded-full hover:bg-gray-200 transition-colors"
         >
           <PhoneCall className="h-5 w-5" />
