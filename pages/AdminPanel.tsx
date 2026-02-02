@@ -3,7 +3,7 @@ import {
   collection, getDocs, deleteDoc, doc, query, orderBy, addDoc, serverTimestamp 
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Trash2, Search, ShieldCheck, Plus, Save, Phone, MapPin, Building2 } from 'lucide-react';
+import { Trash2, Search, ShieldCheck, Plus, Save, Phone, MapPin, Building2, Calendar } from 'lucide-react';
 
 // --- TYPES ---
 interface Donor {
@@ -12,7 +12,8 @@ interface Donor {
   bloodGroup: string;
   district: string;
   location: string;
-  phone: string; // FIXED: Matches database now
+  phone: string;
+  createdAt?: any; // Added to handle Date
 }
 
 interface DirectoryContact {
@@ -60,11 +61,12 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  // --- 2. FETCH DATA ---
+  // --- 2. FETCH DATA (UPDATED SORTING) ---
   const fetchDonors = async () => {
     setLoading(true);
     try {
-      const q = query(collection(db, 'donors'), orderBy('name'));
+      // UPDATED: Ordered by 'createdAt' (Newest First) instead of Name
+      const q = query(collection(db, 'donors'), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
       
       const donorList = snapshot.docs.map(doc => {
@@ -75,7 +77,8 @@ const AdminPanel: React.FC = () => {
           bloodGroup: data.bloodGroup || '',
           district: data.district || '',
           location: data.location || '',
-          phone: data.phone || data.mobile || '' // Handle both key names safely
+          phone: data.phone || data.mobile || '',
+          createdAt: data.createdAt
         } as Donor;
       });
       setDonors(donorList);
@@ -118,7 +121,6 @@ const AdminPanel: React.FC = () => {
       return;
     }
 
-    // Custom Category Logic
     const finalCategory = (selectedCategory === 'Other' && customCategory.trim() !== '') 
       ? customCategory.trim() 
       : selectedCategory;
@@ -144,7 +146,6 @@ const AdminPanel: React.FC = () => {
       
       setContacts([...contacts, newEntry]);
       
-      // Reset Form
       setNewContact({ name: '', phone: '', location: '' });
       setSelectedCategory('Ambulance');
       setCustomCategory('');
@@ -154,6 +155,14 @@ const AdminPanel: React.FC = () => {
       console.error("Error adding contact: ", error);
       alert("Failed to add contact.");
     }
+  };
+
+  // --- HELPER: Format Date ---
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return 'N/A';
+    // Convert Firebase Timestamp to readable date
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' });
   };
 
   // --- 5. RENDER LOGIN SCREEN ---
@@ -228,6 +237,7 @@ const AdminPanel: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Registered</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Mobile</th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Group</th>
@@ -243,6 +253,9 @@ const AdminPanel: React.FC = () => {
                   return nameMatch || phoneMatch;
                 }).map((donor) => (
                   <tr key={donor.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-xs text-gray-500 font-mono">
+                      {formatDate(donor.createdAt)}
+                    </td>
                     <td className="px-6 py-4 font-medium text-gray-900">{donor.name}</td>
                     <td className="px-6 py-4 text-gray-600">{donor.phone}</td>
                     <td className="px-6 py-4"><span className="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">{donor.bloodGroup}</span></td>
@@ -259,7 +272,7 @@ const AdminPanel: React.FC = () => {
                   </tr>
                 ))}
                 {donors.length === 0 && !loading && (
-                   <tr><td colSpan={5} className="text-center py-6 text-gray-500">No donors found.</td></tr>
+                   <tr><td colSpan={6} className="text-center py-6 text-gray-500">No donors found.</td></tr>
                 )}
               </tbody>
             </table>
