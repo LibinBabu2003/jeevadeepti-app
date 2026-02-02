@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  collection, getDocs, deleteDoc, doc, query, orderBy, addDoc, serverTimestamp 
+  collection, getDocs, deleteDoc, updateDoc, doc, query, orderBy, addDoc, serverTimestamp 
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Trash2, Search, ShieldCheck, Plus, Save, Phone, MapPin, Building2, Calendar } from 'lucide-react';
+import { Trash2, Search, ShieldCheck, Plus, Save, Phone, MapPin, Building2, Pencil, X } from 'lucide-react';
+import { KERALA_DISTRICTS, BLOOD_GROUPS } from '../constants'; // Import constants for dropdowns
 
 // --- TYPES ---
 interface Donor {
@@ -13,7 +14,7 @@ interface Donor {
   district: string;
   location: string;
   phone: string;
-  createdAt?: any; // Added to handle Date
+  createdAt?: any;
 }
 
 interface DirectoryContact {
@@ -40,7 +41,10 @@ const AdminPanel: React.FC = () => {
   const [donors, setDonors] = useState<Donor[]>([]);
   const [contacts, setContacts] = useState<DirectoryContact[]>([]);
 
-  // --- FORM STATE ---
+  // --- EDIT STATE ---
+  const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
+
+  // --- NEW CONTACT FORM STATE ---
   const [newContact, setNewContact] = useState({
     name: '',
     phone: '',
@@ -61,11 +65,10 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  // --- 2. FETCH DATA (UPDATED SORTING) ---
+  // --- 2. FETCH DATA ---
   const fetchDonors = async () => {
     setLoading(true);
     try {
-      // UPDATED: Ordered by 'createdAt' (Newest First) instead of Name
       const q = query(collection(db, 'donors'), orderBy('createdAt', 'desc'));
       const snapshot = await getDocs(q);
       
@@ -113,7 +116,32 @@ const AdminPanel: React.FC = () => {
     } catch (err) { alert('Error deleting'); }
   };
 
-  // --- 4. ADD NEW CONTACT FUNCTION ---
+  // --- 4. UPDATE DONOR FUNCTION (EDIT) ---
+  const handleUpdateDonor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDonor) return;
+
+    try {
+      const donorRef = doc(db, "donors", editingDonor.id);
+      await updateDoc(donorRef, {
+        name: editingDonor.name,
+        phone: editingDonor.phone,
+        bloodGroup: editingDonor.bloodGroup,
+        district: editingDonor.district,
+        location: editingDonor.location
+      });
+
+      // Update Local State
+      setDonors(prev => prev.map(d => d.id === editingDonor.id ? editingDonor : d));
+      setEditingDonor(null); // Close Modal
+      alert("Donor Details Updated!");
+    } catch (error) {
+      console.error("Error updating: ", error);
+      alert("Failed to update.");
+    }
+  };
+
+  // --- 5. ADD NEW CONTACT FUNCTION ---
   const handleAddContact = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newContact.name || !newContact.phone) {
@@ -157,15 +185,13 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  // --- HELPER: Format Date ---
   const formatDate = (timestamp: any) => {
     if (!timestamp) return 'N/A';
-    // Convert Firebase Timestamp to readable date
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' });
   };
 
-  // --- 5. RENDER LOGIN SCREEN ---
+  // --- 6. RENDER LOGIN SCREEN ---
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -193,9 +219,9 @@ const AdminPanel: React.FC = () => {
     );
   }
 
-  // --- 6. RENDER DASHBOARD ---
+  // --- 7. RENDER DASHBOARD ---
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
       
       {/* HEADER & TABS */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
@@ -260,7 +286,17 @@ const AdminPanel: React.FC = () => {
                     <td className="px-6 py-4 text-gray-600">{donor.phone}</td>
                     <td className="px-6 py-4"><span className="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">{donor.bloodGroup}</span></td>
                     <td className="px-6 py-4 text-gray-600">{donor.location}</td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4 text-center flex justify-center gap-2">
+                      {/* EDIT BUTTON */}
+                      <button 
+                        onClick={() => setEditingDonor(donor)} 
+                        className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-colors"
+                        title="Edit Donor"
+                      >
+                        <Pencil className="h-5 w-5" />
+                      </button>
+                      
+                      {/* DELETE BUTTON */}
                       <button 
                         onClick={() => handleDeleteDonor(donor.id, donor.name)} 
                         className="text-red-600 hover:bg-red-50 p-2 rounded-full transition-colors"
@@ -276,6 +312,84 @@ const AdminPanel: React.FC = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* === EDIT MODAL (POPUP) === */}
+      {editingDonor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Edit Donor Details</h2>
+              <button onClick={() => setEditingDonor(null)} className="p-1 hover:bg-gray-100 rounded-full">
+                <X className="h-6 w-6 text-gray-500" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleUpdateDonor} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                <input 
+                  type="text" 
+                  value={editingDonor.name} 
+                  onChange={(e) => setEditingDonor({...editingDonor, name: e.target.value})}
+                  className="w-full p-2 border rounded-lg"
+                  required 
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input 
+                  type="text" 
+                  value={editingDonor.phone} 
+                  onChange={(e) => setEditingDonor({...editingDonor, phone: e.target.value})}
+                  className="w-full p-2 border rounded-lg"
+                  required 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Blood Group</label>
+                  <select 
+                    value={editingDonor.bloodGroup} 
+                    onChange={(e) => setEditingDonor({...editingDonor, bloodGroup: e.target.value})}
+                    className="w-full p-2 border rounded-lg bg-white"
+                  >
+                    {BLOOD_GROUPS.map(bg => <option key={bg} value={bg}>{bg}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                   <label className="block text-sm font-medium text-gray-700">District</label>
+                   <select 
+                      value={editingDonor.district} 
+                      onChange={(e) => setEditingDonor({...editingDonor, district: e.target.value})}
+                      className="w-full p-2 border rounded-lg bg-white"
+                   >
+                      {KERALA_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                   </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Location</label>
+                <input 
+                  type="text" 
+                  value={editingDonor.location} 
+                  onChange={(e) => setEditingDonor({...editingDonor, location: e.target.value})}
+                  className="w-full p-2 border rounded-lg"
+                  required 
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button type="button" onClick={() => setEditingDonor(null)} className="flex-1 py-2 border rounded-lg hover:bg-gray-50 font-medium">Cancel</button>
+                <button type="submit" className="flex-1 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-bold">Update</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
