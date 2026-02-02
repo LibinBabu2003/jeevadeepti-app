@@ -1,102 +1,116 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, HeartHandshake, Contact, Droplet } from 'lucide-react';
+import { Search, UserPlus, Heart, Users, PhoneCall } from 'lucide-react';
+import { collection, getCountFromServer } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Home: React.FC = () => {
-  return (
-    <div className="flex flex-col min-h-[calc(100vh-64px)]">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-b from-brand-50 to-white pt-12 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10 pointer-events-none">
-           <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="absolute -top-20 -left-20 w-96 h-96 text-brand-600 fill-current">
-              <path fill="#DC2626" d="M47.5,-61.8C59.7,-51.2,66.8,-34.5,69.5,-17.8C72.2,-1.1,70.5,15.6,61.9,29.3C53.3,43,37.8,53.7,21.6,60.8C5.4,67.9,-11.5,71.4,-26.8,66.1C-42.1,60.8,-55.8,46.7,-63.9,30.3C-72,13.9,-74.5,-4.8,-68.8,-21.3C-63.1,-37.8,-49.2,-52.1,-35.1,-61.8C-21,-71.5,-6.7,-76.6,6.3,-84.2L12.5,-91.8" transform="translate(100 100)" />
-           </svg>
-        </div>
+  const [donorCount, setDonorCount] = useState<number | null>(null);
 
-        <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
-            <span className="block text-brand-600">Jeevadeepti</span>
-            <span className="block text-2xl sm:text-3xl mt-2 font-medium text-gray-600">Lighting Lives through Blood</span>
+  // Fetch the total number of donors
+  useEffect(() => {
+    const getCount = async () => {
+      try {
+        const coll = collection(db, "donors");
+        const snapshot = await getCountFromServer(coll);
+        setDonorCount(snapshot.data().count);
+      } catch (err) {
+        console.error("Error counting donors:", err);
+      }
+    };
+    getCount();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* HERO SECTION */}
+      <div className="relative bg-red-700 text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1615461166324-cd9f949021ce?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+          <div className="bg-white/10 p-3 rounded-full mb-6 backdrop-blur-sm">
+            <Heart className="h-12 w-12 text-red-100 animate-pulse" fill="currentColor" />
+          </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
+            Jeevadeepti
           </h1>
-          <p className="mt-4 max-w-lg mx-auto text-lg text-gray-500 font-malayalam">
-            രക്തം നൽകൂ, ജീവൻ രക്ഷിക്കൂ. <br/>
-            An Initiative by <span className="font-bold text-brand-600">Yuvadeepti SMYM Muttar NEW</span>
+          <p className="text-xl md:text-2xl text-red-100 max-w-2xl mb-8 font-light">
+            Yuvadeepti SMYM Muttar New
+            <br/>
+            <span className="text-sm md:text-base opacity-90 mt-2 block">
+              "Connecting life savers with those in need."
+            </span>
           </p>
 
-          <div className="mt-12 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Register Button */}
-            <Link 
-              to="/register" 
-              className="group relative bg-white rounded-2xl shadow-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl border border-red-50 animate-card-pulse hover:animate-none"
-            >
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 bg-brand-600 text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                <HeartHandshake size={32} />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Register as Donor</h2>
-              <p className="text-xl font-bold text-brand-600 font-malayalam mb-4">ജീവൻ നൽകാം</p>
-              <p className="text-gray-500 text-sm">Join our community of life savers. Your one donation can save up to 3 lives.</p>
-              <div className="mt-6 flex items-center justify-center text-brand-600 font-semibold group-hover:underline">
-                Register Now &rarr;
-              </div>
-            </Link>
-
-            {/* Find Blood Button */}
+          {/* ACTION BUTTONS */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
             <Link 
               to="/search" 
-              className="group relative bg-white rounded-2xl shadow-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl border border-red-50"
+              className="flex-1 flex items-center justify-center gap-2 bg-white text-red-700 px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-gray-50 transition-transform transform hover:-translate-y-1"
             >
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 bg-gray-800 text-white p-3 rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                <Search size={32} />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Find Blood</h2>
-              <p className="text-xl font-bold text-brand-600 font-malayalam mb-4">രക്തം അന്വേഷിക്കാം</p>
-              <p className="text-gray-500 text-sm">Urgent requirement? Search our verified donor database by district and blood group.</p>
-              <div className="mt-6 flex items-center justify-center text-brand-600 font-semibold group-hover:underline">
-                Search Donors &rarr;
-              </div>
+              <Search className="h-5 w-5" /> Find Donor
             </Link>
+            <Link 
+              to="/register" 
+              className="flex-1 flex items-center justify-center gap-2 bg-red-900 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-red-950 transition-transform transform hover:-translate-y-1"
+            >
+              <UserPlus className="h-5 w-5" /> Register
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* LIVE STATS SECTION */}
+      <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-10">
+        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-center border-t-4 border-red-500">
+          
+          {/* Stat 1 */}
+          <div className="flex flex-col items-center">
+            <div className="bg-red-50 p-3 rounded-full mb-3">
+              <Users className="h-8 w-8 text-red-600" />
+            </div>
+            <h3 className="text-4xl font-bold text-gray-900">
+              {donorCount !== null ? donorCount : "..."}
+            </h3>
+            <p className="text-gray-500 font-medium">Registered Donors</p>
           </div>
 
-          <div className="mt-12">
-            <Link 
-              to="/directory"
-              className="inline-flex items-center space-x-2 text-gray-600 hover:text-brand-600 transition-colors bg-white px-6 py-3 rounded-full shadow-md hover:shadow-lg"
-            >
-              <Contact size={20} />
-              <span className="font-medium">Emergency Directory</span>
-            </Link>
+          {/* Stat 2 (Static for now, can be dynamic later) */}
+          <div className="flex flex-col items-center border-t md:border-t-0 md:border-l border-gray-100 pt-6 md:pt-0">
+             <div className="bg-green-50 p-3 rounded-full mb-3">
+               <PhoneCall className="h-8 w-8 text-green-600" />
+             </div>
+             <h3 className="text-4xl font-bold text-gray-900">24/7</h3>
+             <p className="text-gray-500 font-medium">Emergency Directory</p>
           </div>
+
+          {/* Stat 3 */}
+          <div className="flex flex-col items-center border-t md:border-t-0 md:border-l border-gray-100 pt-6 md:pt-0">
+             <div className="bg-blue-50 p-3 rounded-full mb-3">
+               <Heart className="h-8 w-8 text-blue-600" />
+             </div>
+             <h3 className="text-4xl font-bold text-gray-900">100%</h3>
+             <p className="text-gray-500 font-medium">Voluntary Service</p>
+          </div>
+
         </div>
       </div>
-      
-      {/* Quick Stats or Info Strip */}
-      <div className="bg-white py-12 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div className="p-4">
-                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-brand-100 text-brand-600 mb-4">
-                   <Droplet size={24} />
-                 </div>
-                 <h3 className="text-lg font-semibold text-gray-900">100% Voluntary</h3>
-                 <p className="mt-2 text-gray-500 text-sm">All donors are voluntary members of Yuvadeepti SMYM.</p>
-              </div>
-              <div className="p-4">
-                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-brand-100 text-brand-600 mb-4">
-                   <HeartHandshake size={24} />
-                 </div>
-                 <h3 className="text-lg font-semibold text-gray-900">Community Care</h3>
-                 <p className="mt-2 text-gray-500 text-sm">Serving our local communities in Kerala with compassion.</p>
-              </div>
-              <div className="p-4">
-                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-brand-100 text-brand-600 mb-4">
-                   <Contact size={24} />
-                 </div>
-                 <h3 className="text-lg font-semibold text-gray-900">24/7 Support</h3>
-                 <p className="mt-2 text-gray-500 text-sm">Our emergency directory is available anytime you need it.</p>
-              </div>
-           </div>
-        </div>
+
+      {/* HELPLINE / SUPPORT SECTION */}
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Need Assistance?</h2>
+        <p className="text-gray-600 mb-6">
+          If you are unable to find a donor or need urgent help, please contact the Yuvadeepti SMYM Coordinator.
+        </p>
+        <a 
+          href="tel:9999999999" // CHANGE THIS NUMBER
+          className="inline-flex items-center gap-2 text-red-600 font-bold bg-red-50 px-6 py-3 rounded-full hover:bg-red-100 transition-colors"
+        >
+          <PhoneCall className="h-5 w-5" />
+          Call Support: +91 854 724 2798
+        </a>
       </div>
+
     </div>
   );
 };
