@@ -32,7 +32,7 @@ const Home: React.FC = () => {
             - Changed 'bg-center' to 'bg-[center_top]' so heads are not cut off on mobile.
         */}
         <div 
-          className="absolute inset-0 bg-[url('/banner.jpg')] bg-cover bg-[center_top]" 
+          className="absolute inset-0 bg-[url('/banner.png')] bg-cover bg-[center_top]" 
         />
         
         {/* 3. Added a White Fade Overlay (Optional) to make text readable without making it gray */}
