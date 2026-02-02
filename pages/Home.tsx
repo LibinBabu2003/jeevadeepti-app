@@ -109,7 +109,7 @@ const Home: React.FC = () => {
           If you are unable to find a donor or need urgent help, please contact the SMYM Coordinator.
         </p>
         <a 
-          href="tel:9999999999"
+          href="tel:8547242798"
           className="inline-flex items-center gap-2 text-gray-700 font-bold bg-gray-100 px-6 py-3 rounded-full hover:bg-gray-200 transition-colors"
         >
           <PhoneCall className="h-5 w-5" />
