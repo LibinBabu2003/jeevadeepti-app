@@ -7,8 +7,11 @@ import Register from './pages/Register';
 import Directory from './pages/Directory';
 import AdminUpload from './pages/AdminUpload';
 // 1. IMPORT THE NEW PAGE
-import AdminPanel from './pages/AdminPanel'; 
+import AdminPanel from './pages/AdminPanel';
 import Footer from './components/Footer';
+import Migration from './pages/Migration'; // Import it
+import Awareness from './pages/Awareness';
+import PrivacyPolicy from './pages/PrivacyPolicy'; // <--- 1. ADD THIS IMPORT
 
 function App() {
   return (
@@ -22,10 +25,12 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/directory" element={<Directory />} />
             <Route path="/admin-upload" element={<AdminUpload />} />
-            
+
             {/* 2. ADD THE SECRET ROUTE HERE */}
             <Route path="/admin-manage" element={<AdminPanel />} />
-            
+            <Route path="/migrate-data" element={<Migration />} />
+            <Route path="/awareness" element={<Awareness />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           </Routes>
         </main>
         <Footer />

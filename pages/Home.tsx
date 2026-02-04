@@ -1,132 +1,132 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, UserPlus, Heart, Users, PhoneCall } from 'lucide-react';
-import { collection, getCountFromServer } from 'firebase/firestore';
-import { db } from '../firebase';
+import { Search, UserPlus, Heart, Users, ShieldCheck, Phone } from 'lucide-react';
 
 const Home: React.FC = () => {
-  const [donorCount, setDonorCount] = useState<number | null>(null);
-
-  // Fetch the total number of donors
-  useEffect(() => {
-    const getCount = async () => {
-      try {
-        const coll = collection(db, "donors");
-        const snapshot = await getCountFromServer(coll);
-        setDonorCount(snapshot.data().count);
-      } catch (err) {
-        console.error("Error counting donors:", err);
-      }
-    };
-    getCount();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* HERO SECTION */}
-      <div className="relative bg-white text-gray-800 overflow-hidden">
-        
-        {/* 1. BANNER IMAGE:
-            - No 'opacity' (Full brightness)
-            - bg-[center_top] (Fixes mobile cropping by focusing on the top part/faces)
-        */}
-        <div 
-          className="absolute inset-0 bg-[url('/banner1.png')] bg-cover bg-[center_top]" 
-        />
-        
-        {/* 2. OVERLAY REMOVED: 
-            I have removed the gradient divs so the image is clear. 
-            The text below uses shadows to remain readable. 
-        */}
+    <div className="min-h-screen bg-gray-50 font-sans">
 
-        <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-24 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-          
-          {/* Heart Icon - White background for contrast */}
-          <div className="bg-white/90 p-3 rounded-full mb-6 backdrop-blur-sm shadow-md">
-            <Heart className="h-12 w-12 text-red-600 animate-pulse" fill="currentColor" />
-          </div>
-          
-          {/* TITLE: Pure White with Shadow */}
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
-            Jeevadeepti
-          </h1>
-          
-          {/* SUBTITLE: Dark text on a light glass-effect box for readability */}
-          <p className="text-xl md:text-2xl text-gray-900 max-w-2xl mb-8 font-medium bg-white/40 p-4 rounded-xl backdrop-blur-md shadow-sm border border-white/30">
-            Yuvadeepti SMYM Muttar New
-            <br/>
-            <span className="text-sm md:text-base opacity-90 mt-2 block font-normal">
-              "Connecting life savers with those in need."
-            </span>
-          </p>
+      {/* --- HERO SECTION --- */}
+      <div className="relative bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
 
-          {/* ACTION BUTTONS */}
-          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-            <Link 
-              to="/search" 
-              className="flex-1 flex items-center justify-center gap-2 bg-white text-red-700 px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:bg-gray-50 transition-all transform hover:-translate-y-1 border border-gray-100"
-            >
-              <Search className="h-5 w-5" /> Find Donor
-            </Link>
-            <Link 
-              to="/register" 
-              className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:bg-red-700 transition-all transform hover:-translate-y-1"
-            >
-              <UserPlus className="h-5 w-5" /> Register
-            </Link>
+            <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+              <div className="sm:text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold uppercase tracking-wide mb-4 animate-fade-in">
+                  <Heart className="h-3 w-3 fill-current" />
+                  Kerala's Most Trusted Platform
+                </div>
+                <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                  <span className="block xl:inline">Your Blood Can</span>{' '}
+                  <span className="block text-red-600 xl:inline">Save a Life Today</span>
+                </h1>
+                <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                  Jeevadeepti connects those in need with willing donors in seconds. Safe, secure, and purely voluntary.
+                </p>
+
+                <div className="mt-8 sm:mt-10 sm:flex sm:justify-center lg:justify-start gap-3">
+                  <Link to="/search" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 md:py-4 md:text-lg md:px-10 shadow-lg hover:shadow-xl transition-all">
+                    <Search className="h-5 w-5 mr-2" />
+                    Find Blood
+                  </Link>
+                  <Link to="/register" className="w-full flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-medium rounded-lg text-red-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                    <UserPlus className="h-5 w-5 mr-2" />
+                    Register as Donor
+                  </Link>
+                </div>
+              </div>
+            </main>
           </div>
+        </div>
+
+        {/* HERO IMAGE */}
+        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-red-50">
+          <img
+            className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full opacity-90"
+            src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+            alt="Blood Donation Team"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/50 to-transparent lg:via-white/20"></div>
         </div>
       </div>
 
-      {/* LIVE STATS SECTION */}
-      <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-10">
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-center border-t-4 border-red-500">
-          
-          {/* Stat 1 */}
-          <div className="flex flex-col items-center">
-            <div className="bg-red-50 p-3 rounded-full mb-3">
-              <Users className="h-8 w-8 text-red-600" />
+      {/* --- STATS SECTION --- */}
+      <div className="bg-gray-900 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 text-center">
+            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+              <div className="text-4xl font-extrabold text-white mb-2">100%</div>
+              <div className="text-gray-400 font-medium">Verified Donors</div>
             </div>
-            <h3 className="text-4xl font-bold text-gray-900">
-              {donorCount !== null ? donorCount : "..."}
-            </h3>
-            <p className="text-gray-500 font-medium">Registered Donors</p>
+            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+              <div className="text-4xl font-extrabold text-red-500 mb-2">24/7</div>
+              <div className="text-gray-400 font-medium">Service Available</div>
+            </div>
+            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+              <div className="text-4xl font-extrabold text-white mb-2">Secure</div>
+              <div className="text-gray-400 font-medium">Privacy Protected</div>
+            </div>
           </div>
-
-          {/* Stat 2 */}
-          <div className="flex flex-col items-center border-t md:border-t-0 md:border-l border-gray-100 pt-6 md:pt-0">
-             <div className="bg-green-50 p-3 rounded-full mb-3">
-               <PhoneCall className="h-8 w-8 text-green-600" />
-             </div>
-             <h3 className="text-4xl font-bold text-gray-900">24/7</h3>
-             <p className="text-gray-500 font-medium">Emergency Directory</p>
-          </div>
-
-          {/* Stat 3 */}
-          <div className="flex flex-col items-center border-t md:border-t-0 md:border-l border-gray-100 pt-6 md:pt-0">
-             <div className="bg-blue-50 p-3 rounded-full mb-3">
-               <Heart className="h-8 w-8 text-blue-600" />
-             </div>
-             <h3 className="text-4xl font-bold text-gray-900">100%</h3>
-             <p className="text-gray-500 font-medium">Voluntary Service</p>
-          </div>
-
         </div>
       </div>
 
-      {/* HELPLINE / SUPPORT SECTION */}
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Need Assistance?</h2>
-        <p className="text-gray-600 mb-6">
-          If you are unable to find a donor or need urgent help, please contact the SMYM Coordinator.
-        </p>
-        <a 
-          href="tel:8547242798" // Replace with actual number
-          className="inline-flex items-center gap-2 text-gray-700 font-bold bg-gray-100 px-6 py-3 rounded-full hover:bg-gray-200 transition-colors"
-        >
-          <PhoneCall className="h-5 w-5" />
-          Call Support
-        </a>
+      {/* --- FEATURES GRID --- */}
+      <div className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-extrabold text-gray-900">Why Jeevadeepti?</h2>
+            <p className="mt-4 text-lg text-gray-500">Built for speed, safety, and community service.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="text-center px-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <ShieldCheck className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">100% Secure</h3>
+              <p className="text-gray-500">We log every search. Donor numbers are never public. Only verified users can access contacts.</p>
+            </div>
+
+            <div className="text-center px-4">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Users className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Community Driven</h3>
+              <p className="text-gray-500">An initiative by Yuvadeepti SMYM. We are local, we are real, and we care about Alappuzha.</p>
+            </div>
+
+            <div className="text-center px-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Phone className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Direct Contact</h3>
+              <p className="text-gray-500">No middlemen. Connect directly with the donor via Call or WhatsApp instantly.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- CTA SECTION --- */}
+      <div className="bg-red-600">
+        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            <span className="block">Ready to make a difference?</span>
+            <span className="block text-red-100">Join the donor list today.</span>
+          </h2>
+          <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+            <div className="inline-flex rounded-md shadow">
+              <Link to="/register" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-red-600 bg-white hover:bg-red-50">
+                Register Now
+              </Link>
+            </div>
+            <div className="ml-3 inline-flex rounded-md shadow">
+              <Link to="/awareness" className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-800">
+                Learn More
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>

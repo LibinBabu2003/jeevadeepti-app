@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import logo from '../assets/logo.png'; 
+import logo from '../assets/logo.png';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
-  
+
   const navLinks = [
     { name: 'Find Blood', path: '/search' },
     { name: 'Directory', path: '/directory' },
@@ -18,14 +18,14 @@ const Navbar: React.FC = () => {
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          
+
           {/* --- LEFT SIDE: LOGO & BRAND --- */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-3 group">
-              <img 
-                src={logo} 
-                alt="Jeevadeepti Logo" 
-                className="h-10 w-10 object-contain group-hover:scale-110 transition-transform duration-200" 
+              <img
+                src={logo}
+                alt="Jeevadeepti Logo"
+                className="h-10 w-10 object-contain group-hover:scale-110 transition-transform duration-200"
               />
               <div className="flex flex-col justify-center items-center">
                 <h1 className="text-xl font-black text-brand-600 leading-none tracking-tight font-sans">
@@ -44,22 +44,39 @@ const Navbar: React.FC = () => {
               <Link
                 key={link.name}
                 to={link.path}
-                className={`px-3 py-2 rounded-md text-sm font-bold tracking-wide transition-colors duration-200 ${
-                  isActive(link.path)
-                    ? 'bg-brand-50 text-brand-700'
-                    : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-bold tracking-wide transition-colors duration-200 ${isActive(link.path)
+                  ? 'bg-brand-50 text-brand-700'
+                  : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'
+                  }`}
               >
                 {link.name}
               </Link>
             ))}
-            
+
             {/* BUTTON CHANGED TO 'Register' */}
-            <Link 
-              to="/register" 
+            <Link
+              to="/register"
               className="bg-brand-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-md hover:bg-brand-700 hover:shadow-lg transition-all transform hover:-translate-y-0.5"
             >
               Register
+            </Link>
+            <Link
+              to="/awareness"
+              className={`px-3 py-2 rounded-md text-sm font-bold tracking-wide transition-colors duration-200 ${isActive('/awareness')
+                ? 'bg-brand-50 text-brand-700'
+                : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'
+                }`}
+            >
+              Awareness
+            </Link>
+            <Link
+              to="/privacy-policy"
+              className={`px-3 py-2 rounded-md text-sm font-bold tracking-wide transition-colors duration-200 ${isActive('/privacy-policy')
+                ? 'bg-brand-50 text-brand-700'
+                : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'
+                }`}
+            >
+              Privacy Policy
             </Link>
           </div>
 
@@ -84,22 +101,21 @@ const Navbar: React.FC = () => {
                 key={link.name}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive(link.path)
-                    ? 'bg-brand-50 text-brand-700'
-                    : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'
-                }`}
+                className={`block px-3 py-2 rounded-md text-base font-medium ${isActive(link.path)
+                  ? 'bg-brand-50 text-brand-700'
+                  : 'text-gray-600 hover:text-brand-600 hover:bg-gray-50'
+                  }`}
               >
                 {link.name}
               </Link>
             ))}
             {/* Mobile Register Link */}
             <Link
-                to="/register"
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 rounded-md text-base font-bold text-brand-600 bg-brand-50 mt-2"
-              >
-                Register
+              to="/register"
+              onClick={() => setIsOpen(false)}
+              className="block px-3 py-2 rounded-md text-base font-bold text-brand-600 bg-brand-50 mt-2"
+            >
+              Register
             </Link>
           </div>
         </div>
