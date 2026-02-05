@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, getDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { GoogleAuthProvider, signInWithPopup, onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { db, auth } from '../firebase';
-import { Phone, MapPin, MessageCircle, CalendarOff, ShieldAlert, LogIn, Lock, Navigation, Hospital } from 'lucide-react';
+import { Phone, MapPin, MessageCircle, ShieldAlert, LogIn, Lock, Navigation, Hospital } from 'lucide-react';
 import { KERALA_DISTRICTS, BLOOD_GROUPS } from '../constants';
-import { HOSPITALS, TOWN_COORDINATES, getDistance } from '../data/locations'; // Import the new logic
+import { HOSPITALS, TOWN_COORDINATES, getDistance } from '../data/locations';
 
 interface Donor {
   id: string;
@@ -15,15 +15,24 @@ interface Donor {
   lastDonationDate?: string;
   dob?: string;
   phone?: string;
-  distance?: number; // New field for calculated distance
+  distance?: number;
 }
+
+// Helper: Random Shuffle
+const shuffleArray = (array: Donor[]) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
 
 const Search: React.FC = () => {
   // FILTERS
   const [selectedBloodGroup, setSelectedBloodGroup] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
-  const [selectedHospitalId, setSelectedHospitalId] = useState(''); // NEW
+  const [selectedHospitalId, setSelectedHospitalId] = useState('');
 
   const [donors, setDonors] = useState<Donor[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,18 +47,19 @@ const Search: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
+  // FETCH & RANDOMIZE
   useEffect(() => {
     setLoading(true);
-    const q = query(collection(db, "donors"), orderBy("name"));
+    const q = query(collection(db, "donors"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Donor));
-      setDonors(list);
+      setDonors(shuffleArray(list));
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
-  // --- LOGIN & LOGOUT ---
+  // LOGIN & LOGOUT
   const handleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -84,44 +94,53 @@ const Search: React.FC = () => {
         userIp = data.ip;
       } catch (e) { }
 
+      // LOG ACCESS
       await addDoc(collection(db, "secure_access_logs"), {
         seeker_email: currentUser.email,
         seeker_name: currentUser.displayName,
         seeker_uid: currentUser.uid,
         seeker_ip: userIp,
         target_donor_id: donor.id,
+        // Log the real name in database, even if masked in UI
         target_donor_name: donor.name,
         action: "VIEWED_PHONE",
         timestamp: serverTimestamp(),
         device: navigator.userAgent
       });
 
+      // FETCH NUMBER
       const privateSnap = await getDoc(doc(db, "donors_sensitive", donor.id));
+      let phoneToReveal = "";
+
       if (privateSnap.exists()) {
-        setRevealedPhones(prev => ({ ...prev, [donor.id]: privateSnap.data().phone }));
+        phoneToReveal = privateSnap.data().phone;
       } else {
         // @ts-ignore
-        if (donor.phone) setRevealedPhones(prev => ({ ...prev, [donor.id]: donor.phone }));
-        else alert("Contact not found.");
+        if (donor.phone) phoneToReveal = donor.phone;
+        else {
+          alert("Contact not found.");
+          setSelectedDonorForConsent(null);
+          return;
+        }
       }
+
+      // --- AUTO-CLOSE LOGIC ---
+      // We set the state to a NEW object containing ONLY the current donor.
+      // This wipes out any previous keys, effectively closing other cards.
+      setRevealedPhones({ [donor.id]: phoneToReveal });
+
     } catch (e) { alert("Verification failed."); }
     setSelectedDonorForConsent(null);
   };
 
-  // --- FILTERING & DISTANCE SORTING ---
-
-  // 1. Get Selected Hospital Details
+  // FILTERING & DISTANCE
   const selectedHospital = HOSPITALS.find(h => h.id === selectedHospitalId);
 
-  // 2. Process Donors
   let processedDonors = donors.map(donor => {
-    // Try to find distance if hospital is selected
     let dist = undefined;
     if (selectedHospital && donor.location) {
-      // Normalize string (lowercase, trim) to match our database
       const locKey = donor.location.toLowerCase().trim();
       const coords = TOWN_COORDINATES[locKey];
-
       if (coords) {
         dist = getDistance(selectedHospital.lat, selectedHospital.lng, coords.lat, coords.lng);
       }
@@ -129,7 +148,6 @@ const Search: React.FC = () => {
     return { ...donor, distance: dist };
   });
 
-  // 3. Filter
   processedDonors = processedDonors.filter(donor => {
     if (selectedBloodGroup && donor.bloodGroup !== selectedBloodGroup) return false;
     if (selectedDistrict && donor.district !== selectedDistrict) return false;
@@ -137,10 +155,8 @@ const Search: React.FC = () => {
     return true;
   });
 
-  // 4. Sort (Nearest First)
   if (selectedHospitalId) {
     processedDonors.sort((a, b) => {
-      // If distance is known, put it first. If unknown (infinite), put it last.
       const distA = a.distance !== undefined ? a.distance : 9999;
       const distB = b.distance !== undefined ? b.distance : 9999;
       return distA - distB;
@@ -169,7 +185,7 @@ const Search: React.FC = () => {
         {/* SEARCH CONTROLS */}
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
 
-          {/* NEW: HOSPITAL SELECTOR */}
+          {/* HOSPITAL SELECTOR */}
           <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
             <label className="block text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
               <Hospital className="h-4 w-4" /> Where is the Patient? (Select Hospital)
@@ -221,10 +237,16 @@ const Search: React.FC = () => {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {processedDonors.map((donor) => {
               const phone = revealedPhones[donor.id];
-              const displayName = phone ? donor.name : `Donor-${donor.id.substring(0, 4).toUpperCase()}`;
+
+              // --- MASK NAME LOGIC ---
+              // If phone is visible, show real name. 
+              // If not, show "Donor-XXXX"
+              const displayName = phone
+                ? donor.name
+                : `Donor-${donor.id.substring(0, 5).toUpperCase()}`;
 
               return (
-                <div key={donor.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-6 relative">
+                <div key={donor.id} className={`bg-white rounded-xl shadow-sm border overflow-hidden p-6 relative transition-all ${phone ? 'border-green-400 ring-1 ring-green-100' : 'border-gray-100'}`}>
 
                   {/* DISTANCE BADGE */}
                   {donor.distance !== undefined && (
@@ -247,12 +269,12 @@ const Search: React.FC = () => {
 
                   <div className="pt-4 border-t border-gray-100">
                     {phone ? (
-                      <div className="grid grid-cols-2 gap-3">
-                        <a href={`tel:${phone}`} className="flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg font-bold text-sm"><Phone className="h-4 w-4" /> Call</a>
-                        <a href={`https://wa.me/91${phone}`} className="flex items-center justify-center gap-2 border border-green-600 text-green-700 py-2 rounded-lg font-bold text-sm"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
+                      <div className="grid grid-cols-2 gap-3 animate-fade-in-up">
+                        <a href={`tel:${phone}`} className="flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg font-bold text-sm hover:bg-green-700"><Phone className="h-4 w-4" /> Call</a>
+                        <a href={`https://wa.me/91${phone}`} className="flex items-center justify-center gap-2 border border-green-600 text-green-700 py-2 rounded-lg font-bold text-sm hover:bg-green-50"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
                       </div>
                     ) : (
-                      <button onClick={() => initiateReveal(donor)} className={`w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 ${currentUser ? 'bg-blue-600 text-white' : 'bg-gray-800 text-white'}`}>
+                      <button onClick={() => initiateReveal(donor)} className={`w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 ${currentUser ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-800 text-white hover:bg-gray-900'}`}>
                         {currentUser ? <><Lock className="h-4 w-4" /> View Contact</> : <><LogIn className="h-4 w-4" /> Login to View</>}
                       </button>
                     )}
@@ -263,18 +285,18 @@ const Search: React.FC = () => {
           </div>
         )}
 
-        {/* CONSENT POPUP (Same as before) */}
+        {/* CONSENT POPUP */}
         {selectedDonorForConsent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-200">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-200 animate-scale-in">
               <div className="flex items-center gap-3 mb-4 text-red-600"><ShieldAlert className="h-8 w-8" /><h3 className="text-xl font-bold">Legal Warning</h3></div>
-              <p className="mb-4">Requesting number for <span className="font-bold">{selectedDonorForConsent.name}</span>.</p>
+              <p className="mb-4">Requesting number for <span className="font-bold">{(selectedDonorForConsent.name || "Donor").substring(0, 10)}...</span></p>
               <div className="bg-red-50 p-4 rounded-lg border border-red-100 text-sm text-red-800 mb-6">
                 <ul className="list-disc pl-5"><li>I agree to use this for blood donation only.</li><li>My IP Address is logged.</li></ul>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setSelectedDonorForConsent(null)} className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100">Cancel</button>
-                <button onClick={confirmConsentAndReveal} className="flex-1 py-3 rounded-xl font-bold text-white bg-red-600">I Agree</button>
+                <button onClick={() => setSelectedDonorForConsent(null)} className="flex-1 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200">Cancel</button>
+                <button onClick={confirmConsentAndReveal} className="flex-1 py-3 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700">I Agree</button>
               </div>
             </div>
           </div>
