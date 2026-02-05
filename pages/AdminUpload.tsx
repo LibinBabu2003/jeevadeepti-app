@@ -1,123 +1,148 @@
-import React, { useState } from 'react';
-import Papa from 'papaparse';
-import { db } from '../firebase';
+import React, { useState, useEffect } from 'react';
+import { db, auth } from '../firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
-import { Upload, Loader2 } from 'lucide-react';
+import { onAuthStateChanged, User, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { Upload, CheckCircle, LogIn, AlertTriangle } from 'lucide-react';
+
+const CATEGORIES = ['Ambulance', 'Hospital', 'Palliative', 'Police', 'Fire Force', 'Other'];
 
 const AdminUpload: React.FC = () => {
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [textInput, setTextInput] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(CATEGORIES[3]);
   const [logs, setLogs] = useState<string[]>([]);
-  
-  // CONFIGURATION: Force these values for every donor in the file
-  const TARGET_DISTRICT = "Alappuzha";
-  const TARGET_LOCATION = "Muttar";
+  const [loading, setLoading] = useState(false);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setLoading(true);
-    setLogs(['Reading file...']);
-
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async (results) => {
-        setLogs(prev => [...prev, `Found ${results.data.length} rows. Starting upload...`]);
-        await processRows(results.data);
-        setLoading(false);
-      },
-      error: (error) => {
-        setLogs(prev => [...prev, `Error: ${error.message}`]);
-        setLoading(false);
-      }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (!currentUser) setLogs(["🔒 LOCKED: You must Login first."]);
+      else setLogs(["✅ READY: Logged in as " + currentUser.email]);
     });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try { await signInWithPopup(auth, provider); } catch (error) { alert("Login failed"); }
   };
 
-  const processRows = async (rows: any[]) => {
+  const handlePasteUpload = async () => {
+    if (!user) { alert("Please Login first."); return; }
+    if (!textInput.trim()) { alert("Paste data first!"); return; }
+
+    setLoading(true);
+    setLogs(prev => [...prev, "🚀 Starting Smart Upload..."]);
+
+    const rows = textInput.split('\n').filter(line => line.trim() !== '');
     let successCount = 0;
-    let failCount = 0;
     let duplicateCount = 0;
+    let failCount = 0;
+    const directoryRef = collection(db, "contacts");
 
     for (const row of rows) {
-      // 1. MAP CSV COLUMNS
-      const name = row['Name ']?.trim() || row['Name']?.trim(); 
-      const phone = row['Mobile number']?.toString().replace(/[^0-9]/g, ''); 
-      const bloodGroup = row['Blood group']?.trim();
-      
-      // 2. VALIDATION
-      if (!name || !phone || !bloodGroup) {
-        continue; // Skip empty rows
-      }
+      const cleanRow = row.replace(/"/g, '');
+      const parts = cleanRow.split(',');
 
-      // 3. DUPLICATE CHECK (Check if phone already exists)
-      const q = query(collection(db, "donors"), where("phone", "==", phone));
-      const snapshot = await getDocs(q);
-      
-      if (!snapshot.empty) {
-        setLogs(prev => [...prev, `Skipped (Already Exists): ${name}`]);
-        duplicateCount++;
-        continue;
-      }
+      if (parts[0]?.toLowerCase() === 'name') continue;
+      if (parts.length < 2) continue;
 
-      // 4. UPLOAD TO FIREBASE
+      const name = parts[0].trim();
+      const phone = parts[1].trim();
+      const location = parts[2] ? parts[2].trim() : "Alappuzha";
+
       try {
-        await addDoc(collection(db, "donors"), {
+        // 1. CHECK FOR DUPLICATES
+        const q = query(directoryRef, where("phone", "==", phone));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+          setLogs(prev => [...prev, `⚠️ Skipped Duplicate: ${name}`]);
+          duplicateCount++;
+          continue;
+        }
+
+        // 2. SAVE IF NEW
+        await addDoc(directoryRef, {
           name: name,
           phone: phone,
-          bloodGroup: bloodGroup,
-          district: TARGET_DISTRICT,  // Alappuzha
-          location: TARGET_LOCATION,  // Muttar
-          lastDonationDate: null, 
-          createdAt: serverTimestamp()
+          category: selectedCategory,
+          location: location,
+          createdAt: serverTimestamp(),
+          uploadedBy: user.email
         });
+        setLogs(prev => [...prev, `✅ Added: ${name}`]);
         successCount++;
-      } catch (err) {
-        console.error(err);
+
+      } catch (error: any) {
+        setLogs(prev => [...prev, `❌ Error: ${name} - ${error.message}`]);
         failCount++;
       }
     }
-    setLogs(prev => [...prev, `FINISHED! ✅ Added: ${successCount} | ⚠️ Duplicates: ${duplicateCount} | ❌ Errors: ${failCount}`]);
+
+    setLoading(false);
+    setLogs(prev => [...prev, `🏁 DONE! Added: ${successCount} | Duplicates: ${duplicateCount} | Errors: ${failCount}`]);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow p-8">
-        <h1 className="text-2xl font-bold mb-2">Bulk Upload Donors</h1>
-        <div className="flex space-x-4 mb-6 text-sm text-gray-600">
-           <p>District: <span className="font-bold text-brand-600">{TARGET_DISTRICT}</span></p>
-           <p>Location: <span className="font-bold text-brand-600">{TARGET_LOCATION}</span></p>
-        </div>
-        
-        {/* File Input */}
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center mb-6 hover:bg-gray-50 transition-colors">
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500 mb-4">Select your <b>Youth Survey</b> CSV file</p>
-          <input 
-            type="file" 
-            accept=".csv"
-            onChange={handleFileUpload}
-            disabled={loading}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer"
-          />
-        </div>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
 
-        {/* Logs Area */}
-        <div className="bg-gray-900 text-green-400 p-4 rounded-lg h-80 overflow-y-auto text-xs font-mono shadow-inner">
-          {logs.length === 0 ? (
-            <div className="text-gray-500 italic">Waiting for file...</div>
+        <div className="flex justify-between items-center mb-6 border-b pb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Smart Data Paste</h1>
+            <p className="text-sm text-gray-500">Auto-skips duplicates. Safe to re-upload.</p>
+          </div>
+          {!user ? (
+            <button onClick={handleLogin} className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-bold animate-pulse">
+              <LogIn className="w-4 h-4" /> Login Required
+            </button>
           ) : (
-            logs.map((log, i) => (
-              <div key={i} className="mb-1 border-b border-gray-800 pb-1 last:border-0">
-                {log}
-              </div>
-            ))
-          )}
-          {loading && (
-            <div className="mt-4 flex items-center text-yellow-400 animate-pulse">
-              <Loader2 className="w-4 h-4 animate-spin mr-2"/> Processing file... Do not close window.
+            <div className="text-green-600 font-bold text-sm flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" /> Admin Access
             </div>
           )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">1. Select Category</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 font-bold"
+              >
+                {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">2. Paste Data Here</label>
+              <textarea
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder={`Name,Phone,Location\nName,Phone,Location...`}
+                className="w-full h-64 p-3 border border-gray-300 rounded-lg font-mono text-xs focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <button
+              onClick={handlePasteUpload}
+              disabled={loading || !user}
+              className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2
+                ${loading || !user ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+            >
+              {loading ? "Checking & Uploading..." : "UPLOAD SAFELY"} <Upload className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="bg-gray-900 rounded-xl p-4 h-[500px] overflow-y-auto font-mono text-xs border border-gray-800 shadow-inner">
+            <h3 className="text-gray-400 font-bold mb-2 border-b border-gray-700 pb-2">Activity Log</h3>
+            {logs.map((log, i) => (
+              <div key={i} className={`mb-1 break-all ${log.includes('❌') ? 'text-red-400' : log.includes('✅') ? 'text-green-400' : log.includes('⚠️') ? 'text-yellow-400' : 'text-gray-300'}`}>
+                {log}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

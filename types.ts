@@ -1,17 +1,17 @@
 export interface Donor {
-  id: number;
+  id: string;
   name: string;
   bloodGroup: string;
   phone: string;
   district: string;
   location: string;
-  lastDonationDate: string; // ISO format YYYY-MM-DD
+  lastDonationDate?: string;
 }
 
 export interface EmergencyContact {
-  id: number;
+  id: string;
   name: string;
-  category: 'Ambulance' | 'Hospital' | 'Palliative';
+  category: string; // <--- MUST BE STRING
   phone: string;
   location: string;
 }
