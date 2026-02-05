@@ -1,58 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jeevadeepti - Yuvadeepti SMYM</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manjari:wght@100;400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Poppins', 'sans-serif'],
-              malayalam: ['Manjari', 'sans-serif'],
-            },
-            colors: {
-              brand: {
-                50: '#fef2f2',
-                100: '#fee2e2',
-                500: '#ef4444',
-                600: '#dc2626',
-                700: '#b91c1c',
-              }
-            },
-            animation: {
-              'card-pulse': 'cardPulse 3s infinite ease-in-out',
-            },
-            keyframes: {
-              cardPulse: {
-                '0%, 100%': { 
-                  borderColor: '#fef2f2',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                  transform: 'scale(1)'
-                },
-                '50%': { 
-                  borderColor: '#fecaca',
-                  boxShadow: '0 0 25px 5px rgba(220, 38, 38, 0.15)',
-                  transform: 'scale(1.02)'
-                }
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#dc2626" />
+
+  <title>Blood Donors Kerala - Jeevadeepti Emergency Network</title>
+
+  <meta name="description"
+    content="Find blood donors instantly in Alappuzha, Kottayam, and Pathanamthitta. Jeevadeepti is Kerala's fastest free emergency blood network. Connect with Police, Fire Force, and Donors." />
+
+  <meta name="keywords"
+    content="Jeevadeepti, Blood Donation Kerala, Alappuzha Blood Donors, Kottayam Blood Donors, Kerala Police Numbers, Emergency Directory, SMYM, Yuvadeepti" />
+
+  <meta property="og:title" content="Need Blood? Find Donors in Kerala Instantly" />
+  <meta property="og:description"
+    content="Jeevadeepti connects you directly to donors and emergency services in Alappuzha, Kottayam & Pathanamthitta. 100% Free." />
+  <meta property="og:image" content="/logo192.png" />
+  <meta property="og:url" content="https://jeevadeepti.netlify.app/" />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manjari:wght@100;400;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+            malayalam: ['Manjari', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fef2f2',
+              100: '#fee2e2',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+            }
+          },
+          animation: {
+            'card-pulse': 'cardPulse 3s infinite ease-in-out',
+          },
+          keyframes: {
+            cardPulse: {
+              '0%, 100%': {
+                borderColor: '#fef2f2',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                transform: 'scale(1)'
+              },
+              '50%': {
+                borderColor: '#fecaca',
+                boxShadow: '0 0 25px 5px rgba(220, 38, 38, 0.15)',
+                transform: 'scale(1.02)'
               }
             }
           }
         }
       }
+    }
+  </script>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NGO",
+      "name": "Jeevadeepti Blood Donation Network",
+      "url": "https://jeevadeepti.netlify.app",
+      "logo": "https://jeevadeepti.netlify.app/logo192.png",
+      "areaServed": ["Alappuzha", "Kottayam", "Pathanamthitta", "Kerala"],
+      "description": "Emergency blood donor network and directory for Kerala."
+    }
     </script>
-  </head>
-  <body class="bg-gray-50 text-gray-800 antialiased">
-    <div id="root"></div>
-    
-    <script type="module" src="/index.tsx"></script>
-  </body>
+</head>
+
+<body class="bg-gray-50 text-gray-800 antialiased">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
