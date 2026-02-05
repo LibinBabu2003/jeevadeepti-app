@@ -30,11 +30,12 @@ const Home: React.FC = () => {
       {/* ================= HERO SECTION ================= */}
       <div className="relative bg-white overflow-hidden">
 
-        {/* 1. HERO IMAGE */}
+        {/* 1. HERO IMAGE (Optimized for Speed) */}
         <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 h-64 sm:h-72 md:h-96 lg:h-full bg-gray-100">
           <img
             className="w-full h-full object-cover object-center"
-            src="https://images.unsplash.com/photo-1615461066159-fea0960485d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80"
+            // CHANGED: w=800 and q=60 for faster loading
+            src="https://images.unsplash.com/photo-1615461066159-fea0960485d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
             alt="Blood Donor Donating"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent lg:hidden"></div>
@@ -48,25 +49,26 @@ const Home: React.FC = () => {
             <main className="mx-auto max-w-7xl lg:pt-20 xl:pt-28">
               <div className="text-center lg:text-left">
 
-                {/* Trust Badge */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-700 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4 border border-red-100">
+                {/* Trust Badge - CHANGED: Darker red text for accessibility */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-800 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-4 border border-red-100">
                   <Shield className="w-3 h-3" /> 100% Verified Platform
                 </div>
 
-                {/* Headline */}
+                {/* Headline - CHANGED: Darker red accent */}
                 <h1 className="text-3xl tracking-tighter font-extrabold text-gray-900 sm:text-5xl md:text-6xl mb-4 leading-tight">
                   <span className="block xl:inline">Your Blood Can</span>{' '}
-                  <span className="block text-red-600 xl:inline">Save a Life.</span>
+                  <span className="block text-red-700 xl:inline">Save a Life.</span>
                 </h1>
 
-                <p className="mt-3 text-sm text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                {/* Description - CHANGED: Darker gray for readability */}
+                <p className="mt-3 text-sm text-gray-600 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                   Jeevadeepti is Kerala's trusted emergency network. We connect patients with willing donors in seconds. Safe, fast, and voluntary.
                 </p>
 
                 <div className="mt-8 flex flex-col sm:flex-row gap-3">
                   <Link
                     to="/search"
-                    className="flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-bold rounded-xl text-white bg-red-600 hover:bg-red-700 md:py-4 md:text-lg md:px-10 shadow-lg hover:shadow-red-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95"
+                    className="flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-bold rounded-xl text-white bg-red-700 hover:bg-red-800 md:py-4 md:text-lg md:px-10 shadow-lg hover:shadow-red-500/30 transition-all transform hover:-translate-y-0.5 active:scale-95"
                   >
                     <Search className="w-5 h-5 mr-2" />
                     Find Blood
@@ -86,7 +88,7 @@ const Home: React.FC = () => {
       </div>
 
       {/* ================= FLOATING STATS (LIVE DATA) ================= */}
-      <div className="bg-gray-900 border-t-4 border-red-600">
+      <div className="bg-gray-900 border-t-4 border-red-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           <div className="grid grid-cols-3 gap-4 md:gap-8 text-center divide-x divide-gray-800">
             <div>
@@ -111,8 +113,11 @@ const Home: React.FC = () => {
       {/* ================= ACTION CARDS ================= */}
       <div className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* SEO FIX: Added hidden h2 for proper structure */}
+          <h2 className="sr-only">Quick Actions</h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8">
-            <Link to="/register" className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-600 to-red-700 p-6 md:p-8 shadow-xl transition-all active:scale-[0.98]">
+            <Link to="/register" className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-700 to-red-800 p-6 md:p-8 shadow-xl transition-all active:scale-[0.98]">
               <div className="absolute top-0 right-0 -mt-4 -mr-4 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
               <div className="relative z-10">
                 <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white shadow-inner">
@@ -128,12 +133,14 @@ const Home: React.FC = () => {
 
             <Link to="/search" className="group relative overflow-hidden rounded-2xl bg-white border border-gray-200 p-6 md:p-8 shadow-lg transition-all active:scale-[0.98]">
               <div className="relative z-10">
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                {/* CHANGED: Darker red text for icon */}
+                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-800">
                   <Search className="h-5 w-5" />
                 </div>
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">I need Blood</h3>
-                <p className="text-gray-500 text-sm md:text-base mb-4">Search verified donors by District. Call directly.</p>
-                <span className="inline-flex items-center text-sm font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-full">
+                <p className="text-gray-600 text-sm md:text-base mb-4">Search verified donors by District. Call directly.</p>
+                {/* CHANGED: Darker red text for link */}
+                <span className="inline-flex items-center text-sm font-bold text-red-800 bg-red-50 px-3 py-1.5 rounded-full">
                   Find Donors <ChevronRight className="ml-1 h-4 w-4" />
                 </span>
               </div>
@@ -147,37 +154,40 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold text-gray-900">Why Jeevadeepti?</h2>
-            <p className="text-gray-500 text-sm">Built for speed, safety, and community.</p>
+            <p className="text-gray-600 text-sm">Built for speed, safety, and community.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-start gap-4">
-              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
+              {/* CHANGED: Darker blue for contrast */}
+              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-700 flex-shrink-0">
                 <Shield className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-gray-900">Secure & Private</h3>
-                <p className="text-xs text-gray-500 mt-1">We never share lists publicly. Only verified users access numbers.</p>
+                <p className="text-xs text-gray-600 mt-1">We never share lists publicly. Only verified users access numbers.</p>
               </div>
             </div>
 
             <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-start gap-4">
-              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-600 flex-shrink-0">
+              {/* CHANGED: Darker green for contrast */}
+              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-700 flex-shrink-0">
                 <Clock className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-gray-900">Real-Time Speed</h3>
-                <p className="text-xs text-gray-500 mt-1">Every second counts. Our search engine connects you instantly.</p>
+                <p className="text-xs text-gray-600 mt-1">Every second counts. Our search engine connects you instantly.</p>
               </div>
             </div>
 
             <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-start gap-4">
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600 flex-shrink-0">
+              {/* CHANGED: Darker purple for contrast */}
+              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-700 flex-shrink-0">
                 <Users className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-gray-900">Community Driven</h3>
-                <p className="text-xs text-gray-500 mt-1">An initiative by Yuvadeepti SMYM. A family of volunteers.</p>
+                <p className="text-xs text-gray-600 mt-1">An initiative by Yuvadeepti SMYM. A family of volunteers.</p>
               </div>
             </div>
 

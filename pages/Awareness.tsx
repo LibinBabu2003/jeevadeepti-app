@@ -9,7 +9,7 @@ const Awareness: React.FC = () => {
         {
             id: 0,
             type: "fade", // Transition Type
-            image: "https://images.unsplash.com/photo-1615461066841-6116e61058f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+            image: "https://images.unsplash.com/photo-1615461066841-6116e61058f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60",
             overlay: "bg-gradient-to-r from-red-900/90 to-red-800/80",
             content: (
                 <div className="text-center text-white px-4">
@@ -34,7 +34,7 @@ const Awareness: React.FC = () => {
         {
             id: 1,
             type: "slide-up", // Transition Type
-            image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+            image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60",
             overlay: "bg-white/95",
             content: (
                 <div className="max-w-6xl mx-auto px-4 text-center pb-12">
@@ -71,7 +71,7 @@ const Awareness: React.FC = () => {
         {
             id: 2,
             type: "zoom", // Transition Type
-            image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+            image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60",
             overlay: "bg-slate-900/90",
             content: (
                 <div className="max-w-5xl mx-auto px-6 w-full pb-10">
@@ -107,7 +107,7 @@ const Awareness: React.FC = () => {
         {
             id: 3,
             type: "flip", // Transition Type
-            image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80",
+            image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=60",
             overlay: "bg-white/90",
             content: (
                 <div className="text-center px-4 max-w-4xl mx-auto pb-8">
@@ -161,8 +161,9 @@ const Awareness: React.FC = () => {
                     {/* BACKGROUND IMAGE */}
                     <img
                         src={slide.image}
-                        alt="Slide"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        alt={slide.title}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                     />
 
                     {/* OVERLAY */}
